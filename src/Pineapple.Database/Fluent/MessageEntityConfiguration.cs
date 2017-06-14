@@ -9,6 +9,9 @@ namespace Pineapple.Database.Fluent
         {
             var message = this;
             message.HasKey(x => x.MessageId);
+            message.Property(x => x.SendDate).IsRequired().HasColumnType("datetime2");
+            message.Property(x => x.UserFromId).IsRequired();
+            message.Property(x => x.UserToId).IsRequired();
             message.Property(x => x.Text).IsRequired().HasColumnType("nvarchar");
         }
     }
