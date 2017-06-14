@@ -7,15 +7,8 @@ using Pineapple.Database.Models;
 
 namespace Pineapple.Service.Controllers
 {
-    [Route("api/[controller]")]
-    public sealed class MessagesController : Controller
+    public sealed class MessagesController : BaseController
     {
-        private String _connectionString;
-
-        public MessagesController()
-        {
-            _connectionString = "";
-        }
         [HttpGet]
         public async Task<IActionResult> GetMessages()
         {
@@ -25,6 +18,23 @@ namespace Pineapple.Service.Controllers
                 {
                     Message[] messages = await context.Messages.ToArrayAsync();
                     return Ok(messages);
+                }
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception);
+            }
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetMessageById(Int32 id)
+        {
+            try
+            {
+                using (var context = new PineappleContext(_connectionString))
+                {
+                    Message message = await context.Messages.FirstOrDefaultAsync(x=>x.MessageId == id);
+                    return Ok(message);
                 }
             }
             catch (Exception exception)
@@ -45,6 +55,16 @@ namespace Pineapple.Service.Controllers
             {
                 using (var context = new PineappleContext(_connectionString))
                 {
+                    if (!await context.Users.AnyAsync(user => user.UserId == message.UserFromId))
+                    {
+                        return BadRequest($"{nameof(message.UserFromId)} is invalid");
+                    }
+
+                    if (!await context.Users.AnyAsync(user => user.UserId == message.UserToId))
+                    {
+                        return BadRequest($"{nameof(message.UserToId)} is invalid");
+                    }
+
                     context.Messages.Add(message);
                     await context.SaveChangesAsync();
                     return Ok(message);
@@ -55,5 +75,6 @@ namespace Pineapple.Service.Controllers
                 return BadRequest(exception);
             }
         }
+
     }
 }
