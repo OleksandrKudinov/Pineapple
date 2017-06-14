@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pineapple.Service", "Pineapple.Service\Pineapple.Service.csproj", "{150F75EA-CF6C-4C61-9399-CAE3E3986F51}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A4E079E9-35AF-4248-8D83-4494EA061171}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pineapple.Service", "src\Pineapple.Service\Pineapple.Service.csproj", "{2A464301-1FE9-4CCE-93A4-2BCB229AE7E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,12 +13,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{150F75EA-CF6C-4C61-9399-CAE3E3986F51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{150F75EA-CF6C-4C61-9399-CAE3E3986F51}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{150F75EA-CF6C-4C61-9399-CAE3E3986F51}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{150F75EA-CF6C-4C61-9399-CAE3E3986F51}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A464301-1FE9-4CCE-93A4-2BCB229AE7E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A464301-1FE9-4CCE-93A4-2BCB229AE7E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A464301-1FE9-4CCE-93A4-2BCB229AE7E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A464301-1FE9-4CCE-93A4-2BCB229AE7E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2A464301-1FE9-4CCE-93A4-2BCB229AE7E8} = {A4E079E9-35AF-4248-8D83-4494EA061171}
 	EndGlobalSection
 EndGlobal
