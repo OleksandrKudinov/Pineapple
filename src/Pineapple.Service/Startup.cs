@@ -1,11 +1,15 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Text;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Pineapple.Service.Filters;
+using Pineapple.Service.Infrastructure.Authorization;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Pineapple.Service
@@ -31,18 +35,38 @@ namespace Pineapple.Service
             services.AddMvc();
 
             // Register the Swagger generator, defining one or more Swagger documents
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(swaggerGenOptions =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                swaggerGenOptions.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                //swaggerGenOptions.OperationFilter<AuthorizationHeaderParameterOperationFilter>();
             });
+
             services.ConfigureSwaggerGen(swaggerGenOptions =>
             {
                 swaggerGenOptions.OperationFilter<AuthorizationHeaderParameterOperationFilter>();
             });
+
             var builder = new ContainerBuilder();
+            Register(builder);
             builder.Populate(services);
             Container = builder.Build();
             return new AutofacServiceProvider(Container);
+        }
+
+        private void Register(ContainerBuilder builder)
+        {
+            String secretKey = Configuration.GetSection("JwtSecretKey").Value;
+            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
+            var options = new TokenProviderOptions
+            {
+                Path = "/token",
+                Expiration = TimeSpan.FromDays(365),
+                Audience = "ExampleAudience",
+                Issuer = "ExampleIssuer",
+                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
+            };
+
+            builder.RegisterInstance<TokenProviderOptions>(options);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -51,15 +75,57 @@ namespace Pineapple.Service
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
+            ConfigureJwt(app);
+
+            app.UseMvc();
+            loggerFactory.AddConsole();
+
             app.UseMvc();
 
+            ConfigureSwagger(app);
+        }
+
+        private static void ConfigureSwagger(IApplicationBuilder app)
+        {
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
 
             // Enable middleware to serve swagger-ui (HTML, JS, CSS etc.), specifying the Swagger JSON endpoint.
-            app.UseSwaggerUI(c =>
+            app.UseSwaggerUI(c => { c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"); });
+        }
+
+        private void ConfigureJwt(IApplicationBuilder app)
+        {
+            var options = Container.Resolve<TokenProviderOptions>();
+
+            //app.UseMiddleware<TokenProviderMiddleware>(Options.Create(options));
+
+            var tokenValidationParameters = new TokenValidationParameters
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                // The signing key must match!
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = options.SigningCredentials.Key,
+
+                // Validate the JWT Issuer (iss) claim
+                ValidateIssuer = true,
+                ValidIssuer = "ExampleIssuer",
+
+                // Validate the JWT Audience (aud) claim
+                ValidateAudience = true,
+                ValidAudience = "ExampleAudience",
+
+                // Validate the token expiry
+                ValidateLifetime = true,
+
+                // If you want to allow a certain amount of clock drift, set that here:
+                ClockSkew = TimeSpan.Zero
+            };
+
+            app.UseJwtBearerAuthentication(new JwtBearerOptions
+            {
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true,
+                TokenValidationParameters = tokenValidationParameters
             });
         }
 
