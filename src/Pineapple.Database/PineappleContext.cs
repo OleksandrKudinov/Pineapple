@@ -16,6 +16,7 @@ namespace Pineapple.Database
         public DbSet<Message> Messages { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Chat> Chats { get; set; }
+        public DbSet<Account> Accounts { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
