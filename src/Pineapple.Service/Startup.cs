@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Pineapple.Service.Filters;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace Pineapple.Service
@@ -33,6 +34,10 @@ namespace Pineapple.Service
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+            });
+            services.ConfigureSwaggerGen(swaggerGenOptions =>
+            {
+                swaggerGenOptions.OperationFilter<AuthorizationHeaderParameterOperationFilter>();
             });
             var builder = new ContainerBuilder();
             builder.Populate(services);
