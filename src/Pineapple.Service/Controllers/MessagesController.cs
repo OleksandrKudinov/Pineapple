@@ -3,7 +3,6 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Pineapple.Database;
 using Pineapple.Database.Models;
 using Pineapple.Service.Models.Binding;
 
@@ -16,7 +15,7 @@ namespace Pineapple.Service.Controllers
         {
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     Message[] messages = await context.Messages
                         .Include(x=>x.User)
@@ -45,7 +44,7 @@ namespace Pineapple.Service.Controllers
         {
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     Message message = await context.Messages.FirstOrDefaultAsync(x => x.MessageId == id);
                     return Ok(message);
@@ -67,7 +66,7 @@ namespace Pineapple.Service.Controllers
 
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     var chat = await context.Chats.Include(x => x.Users).FirstOrDefaultAsync(x => x.ChatId == model.ChatId);
 

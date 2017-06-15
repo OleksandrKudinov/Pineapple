@@ -1,6 +1,6 @@
-﻿using System;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Pineapple.Database;
 
 namespace Pineapple.Service.Controllers
 {
@@ -8,6 +8,6 @@ namespace Pineapple.Service.Controllers
     [Authorize]
     public abstract class BaseController : Controller
     {
-        protected String _connectionString = "";
+        protected PineappleContext RequestDbContext => (PineappleContext)this.HttpContext.RequestServices.GetService(typeof(PineappleContext));
     }
 }

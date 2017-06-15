@@ -16,7 +16,7 @@ namespace Pineapple.Service.Controllers
         {
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     var chats = await context.Chats.Include(x=>x.Users).ToArrayAsync();
                     return Ok(chats.Select(chat=>
@@ -45,7 +45,7 @@ namespace Pineapple.Service.Controllers
         {
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     var chats = await context.Chats
                         .Include(x => x.Users)
@@ -94,7 +94,7 @@ namespace Pineapple.Service.Controllers
             }
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     context.Chats.Add(model);
                     await context.SaveChangesAsync();
@@ -117,7 +117,7 @@ namespace Pineapple.Service.Controllers
             }
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     var chat = await context.Chats.FirstOrDefaultAsync(x => x.ChatId == chatId);
 
@@ -151,7 +151,7 @@ namespace Pineapple.Service.Controllers
         {
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     Message[] messages = await context.Messages
                         .Include(message => message.User)
@@ -187,7 +187,7 @@ namespace Pineapple.Service.Controllers
         {
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     Chat chat = await context.Chats
                         .Include(x => x.Users)

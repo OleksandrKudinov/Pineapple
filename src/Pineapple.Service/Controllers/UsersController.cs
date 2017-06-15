@@ -20,7 +20,7 @@ namespace Pineapple.Service.Controllers
 
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     context.Users.Add(user);
                     await context.SaveChangesAsync();
@@ -38,7 +38,7 @@ namespace Pineapple.Service.Controllers
         {
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     var users = await context.Users.ToArrayAsync();
                     return Ok(users.Select(user => new { user.UserId, user.UserName}));
@@ -56,7 +56,7 @@ namespace Pineapple.Service.Controllers
         {
             try
             {
-                using (var context = new PineappleContext(_connectionString))
+                using (var context = RequestDbContext)
                 {
                     var user = await context.Users.Include(u=>u.Chats).FirstOrDefaultAsync(x=>x.UserId == userId);
                     return Ok(user.Chats.Select(x=>new
