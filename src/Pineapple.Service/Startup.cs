@@ -77,7 +77,7 @@ namespace Pineapple.Service
             builder.Register<PineappleContext>(x =>
             {
                 var connectionString = x.Resolve<IConfigurationRoot>()
-                    .GetConnectionString("Development");
+                    .GetConnectionString("Production");
                 return new PineappleContext(connectionString);
             });
         }

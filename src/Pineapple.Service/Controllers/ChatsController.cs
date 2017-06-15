@@ -210,7 +210,7 @@ namespace Pineapple.Service.Controllers
                 {
                     var userName = HttpContext.User.Claims.FirstOrDefault().Value;
 
-                    var chat = await context.Chats.Include(x => x.Users).FirstOrDefaultAsync(x => x.ChatId == model.ChatId);
+                    var chat = await context.Chats.Include(x => x.Users).FirstOrDefaultAsync(x => x.ChatId == chatId);
 
                     if (chat == null)
                     {
