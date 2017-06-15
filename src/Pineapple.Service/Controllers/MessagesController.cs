@@ -55,51 +55,5 @@ namespace Pineapple.Service.Controllers
                 return BadRequest(exception);
             }
         }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateMessage([FromBody] MessageBindingModel model)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                using (var context = RequestDbContext)
-                {
-                    var chat = await context.Chats.Include(x => x.Users).FirstOrDefaultAsync(x => x.ChatId == model.ChatId);
-
-                    if (chat == null)
-                    {
-                        return BadRequest($"Chat with {model.ChatId} does not exist");
-                    }
-
-                    var user = chat.Users.FirstOrDefault(x => x.UserId == model.UserId);
-
-                    if (user == null)
-                    {
-                        return BadRequest($"User {model.UserId} does not exist in chat {model.ChatId}");
-                    }
-
-                    var message = new Message()
-                    {
-                        User = user,
-                        Chat = chat,
-                        Text = model.Text,
-                        SendDate = DateTime.UtcNow
-                    };
-
-                    context.Messages.Add(message);
-
-                    await context.SaveChangesAsync();
-                    return Ok(model);
-                }
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception);
-            }
-        }
     }
 }
