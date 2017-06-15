@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Pineapple.Database.Models;
+using Pineapple.Service.Models;
+using Pineapple.Service.Models.Binding;
 
 namespace Pineapple.Service.Controllers
 {
@@ -83,9 +85,9 @@ namespace Pineapple.Service.Controllers
                 return BadRequest(exception);
             }
         }
-        
+
         [HttpPost]
-        public async Task<IActionResult> CreateChat([FromBody] Chat model)
+        public async Task<IActionResult> CreateChat([FromBody] ChatBindingModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -93,11 +95,24 @@ namespace Pineapple.Service.Controllers
             }
             try
             {
+                var userName = HttpContext.User.Claims.FirstOrDefault().Value;
+
                 using (var context = RequestDbContext)
                 {
-                    context.Chats.Add(model);
+                    var currentUser = await context.Users.FirstOrDefaultAsync(x => x.UserName == userName);
+                    var chat = new Chat()
+                    {
+                        ChatName = model.ChatName
+                    };
+                    chat.Users = new List<User>();
+                    chat.Users.Add(currentUser);
+                    context.Chats.Add(chat);
                     await context.SaveChangesAsync();
-                    return Ok(model);
+                    return Ok(new
+                    {
+                        chat.ChatId,
+                        chat.ChatName
+                    });
                 }
             }
             catch (Exception exception)
