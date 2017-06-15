@@ -3,36 +3,11 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Pineapple.Database;
-using Pineapple.Database.Models;
 
 namespace Pineapple.Service.Controllers
 {
     public sealed class UsersController : BaseController
     {
-        [HttpPost]
-        public async Task<IActionResult> RegisterUser([FromBody]User user)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                using (var context = RequestDbContext)
-                {
-                    context.Users.Add(user);
-                    await context.SaveChangesAsync();
-                    return Ok(user);
-                }
-            }
-            catch (Exception exception)
-            {
-                return BadRequest(exception);
-            }
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetUsers()
         {
