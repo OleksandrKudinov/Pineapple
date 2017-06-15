@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Pineapple.Database;
 using Pineapple.Service.Filters;
 using Pineapple.Service.Infrastructure.Authorization;
 using Swashbuckle.AspNetCore.Swagger;
@@ -55,18 +56,30 @@ namespace Pineapple.Service
 
         private void Register(ContainerBuilder builder)
         {
-            String secretKey = Configuration.GetSection("JwtSecretKey").Value;
-            SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
-            var options = new TokenProviderOptions
-            {
-                Path = "/token",
-                Expiration = TimeSpan.FromDays(365),
-                Audience = "ExampleAudience",
-                Issuer = "ExampleIssuer",
-                SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
-            };
+            builder.Register<IConfigurationRoot>(x => Configuration).SingleInstance();
 
-            builder.RegisterInstance<TokenProviderOptions>(options);
+            builder.Register<TokenProviderOptions>(x =>
+            {
+                var config = x.Resolve<IConfigurationRoot>();
+                String secretKey = config.GetSection("JwtSecretKey").Value;
+                SymmetricSecurityKey signingKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));
+                var options = new TokenProviderOptions
+                {
+                    Path = "/token",
+                    Expiration = TimeSpan.FromDays(365),
+                    Audience = "ExampleAudience",
+                    Issuer = "ExampleIssuer",
+                    SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
+                };
+                return options;
+            }).SingleInstance();
+
+            builder.Register<PineappleContext>(x =>
+            {
+                var connectionString = x.Resolve<IConfigurationRoot>()
+                    .GetConnectionString("Development");
+                return new PineappleContext(connectionString);
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
