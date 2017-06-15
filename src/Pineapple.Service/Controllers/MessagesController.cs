@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Pineapple.Database;
 using Pineapple.Database.Models;
+using Pineapple.Service.Models.Binding;
 
 namespace Pineapple.Service.Controllers
 {
@@ -16,8 +18,20 @@ namespace Pineapple.Service.Controllers
             {
                 using (var context = new PineappleContext(_connectionString))
                 {
-                    Message[] messages = await context.Messages.ToArrayAsync();
-                    return Ok(messages);
+                    Message[] messages = await context.Messages
+                        .Include(x=>x.User)
+                        .Include(x=>x.Chat)
+                        .ToArrayAsync();
+
+                    return Ok(messages.Select(x =>
+                    new
+                    {
+                        x.MessageId,
+                        User = new { x.User.UserId, x.User.UserName },
+                        Chat = new { x.Chat.ChatId, x.Chat.ChatName },
+                        x.Text,
+                        x.SendDate
+                    }));
                 }
             }
             catch (Exception exception)
@@ -33,7 +47,7 @@ namespace Pineapple.Service.Controllers
             {
                 using (var context = new PineappleContext(_connectionString))
                 {
-                    Message message = await context.Messages.FirstOrDefaultAsync(x=>x.MessageId == id);
+                    Message message = await context.Messages.FirstOrDefaultAsync(x => x.MessageId == id);
                     return Ok(message);
                 }
             }
@@ -44,7 +58,7 @@ namespace Pineapple.Service.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateMessage([FromBody] Message message)
+        public async Task<IActionResult> CreateMessage([FromBody] MessageBindingModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -55,19 +69,32 @@ namespace Pineapple.Service.Controllers
             {
                 using (var context = new PineappleContext(_connectionString))
                 {
-                    if (!await context.Users.AnyAsync(user => user.UserId == message.UserFromId))
+                    var chat = await context.Chats.Include(x => x.Users).FirstOrDefaultAsync(x => x.ChatId == model.ChatId);
+
+                    if (chat == null)
                     {
-                        return BadRequest($"{nameof(message.UserFromId)} is invalid");
+                        return BadRequest($"Chat with {model.ChatId} does not exist");
                     }
 
-                    if (!await context.Users.AnyAsync(user => user.UserId == message.UserToId))
+                    var user = chat.Users.FirstOrDefault(x => x.UserId == model.UserId);
+
+                    if (user == null)
                     {
-                        return BadRequest($"{nameof(message.UserToId)} is invalid");
+                        return BadRequest($"User {model.UserId} does not exist in chat {model.ChatId}");
                     }
+
+                    var message = new Message()
+                    {
+                        User = user,
+                        Chat = chat,
+                        Text = model.Text,
+                        SendDate = DateTime.UtcNow
+                    };
 
                     context.Messages.Add(message);
+
                     await context.SaveChangesAsync();
-                    return Ok(message);
+                    return Ok(model);
                 }
             }
             catch (Exception exception)

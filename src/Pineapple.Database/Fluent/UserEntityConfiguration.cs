@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity.ModelConfiguration;
+﻿using System.Data.Entity.ModelConfiguration;
 using Pineapple.Database.Models;
 
 namespace Pineapple.Database.Fluent
@@ -8,9 +7,10 @@ namespace Pineapple.Database.Fluent
     {
         public UserEntityConfiguration()
         {
-            var message = this;
-            message.HasKey(x => x.UserId);
-            message.Property(x => x.Name).IsRequired();
+            var user = this;
+            user.HasKey(x => x.UserId);
+            user.Property(x => x.UserName).IsRequired();
+            user.HasMany(x => x.Chats).WithMany(c => c.Users);
         }
     }
 }
