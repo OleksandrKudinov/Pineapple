@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Data.Entity;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Pineapple.Database.Models;
 using Pineapple.Service.Infrastructure.Authorization;
 using Pineapple.Service.Models.Binding;
 
@@ -24,25 +27,29 @@ namespace Pineapple.Service.Controllers
 
         [HttpPost]
         [Route("token")]
-        public IActionResult Auth([FromBody] LoginViewModel model)
+        public async Task<IActionResult> Auth([FromBody] LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            String username = model.Username;
-            String password = model.Password;
+            Account account;
+            using (var context = RequestDbContext)
+            {
+                account = await context.Accounts.FirstOrDefaultAsync(x => x.Login == model.Username && x.PasswordHash == model.Password);
+            }
 
-            ClaimsIdentity identity = username == "user" && password == "password"
-                ? new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] { })
-                : null;
-
-            if (identity == null)
+            if (account == null)
             {
                 return BadRequest("Invalid username or password");
             }
 
+            String username = model.Username;
+            String password = model.Password;
+
+            ClaimsIdentity identity = new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] { })
+            
             var now = DateTime.UtcNow;
 
             // Specifically add the jti (random nonce), iat (issued timestamp), and sub (subject/user) claims.

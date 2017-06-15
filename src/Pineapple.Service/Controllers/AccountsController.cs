@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Pineapple.Database.Models;
 using Pineapple.Service.Models.Binding;
@@ -9,6 +10,7 @@ namespace Pineapple.Service.Controllers
     public sealed class AccountsController : BaseController
     {
         [HttpPost]
+        [AllowAnonymous]
         public async Task<IActionResult> CreateAccount([FromBody] AccountRegisterBindingModel model)
         {
             if (!ModelState.IsValid)

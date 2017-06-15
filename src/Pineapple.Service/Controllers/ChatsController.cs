@@ -4,7 +4,6 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Pineapple.Database;
 using Pineapple.Database.Models;
 
 namespace Pineapple.Service.Controllers
