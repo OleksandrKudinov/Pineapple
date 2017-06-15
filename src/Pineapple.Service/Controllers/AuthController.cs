@@ -48,7 +48,7 @@ namespace Pineapple.Service.Controllers
             String username = model.Username;
             String password = model.Password;
 
-            ClaimsIdentity identity = new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] { })
+            ClaimsIdentity identity = new ClaimsIdentity(new System.Security.Principal.GenericIdentity(username, "Token"), new Claim[] {});
             
             var now = DateTime.UtcNow;
 
