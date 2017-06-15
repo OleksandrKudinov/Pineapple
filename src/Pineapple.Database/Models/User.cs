@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Pineapple.Database
+namespace Pineapple.Database.Models
 {
     public sealed class User
     {
