@@ -49,5 +49,27 @@ namespace Pineapple.Service.Controllers
                 return BadRequest(exception);
             }
         }
+
+        [HttpGet]
+        [Route("{userId}/chats")]
+        public async Task<IActionResult> GetUserChats([FromRoute] Int32 userId)
+        {
+            try
+            {
+                using (var context = new PineappleContext(_connectionString))
+                {
+                    var user = await context.Users.Include(u=>u.Chats).FirstOrDefaultAsync(x=>x.UserId == userId);
+                    return Ok(user.Chats.Select(x=>new
+                    {
+                        x.ChatId,
+                        x.ChatName
+                    }));
+                }
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception);
+            }
+        }
     }
 }

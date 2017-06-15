@@ -24,13 +24,13 @@ namespace Pineapple.Service.Controllers
                     {
                         chat.ChatId,
                         chat.ChatName,
-                        Users = chat.Users.Select(
-                            user=>
-                            new
-                            {
-                                user.UserId,
-                                user.UserName
-                            })
+                        //Users = chat.Users.Select(
+                        //    user=>
+                        //    new
+                        //    {
+                        //        user.UserId,
+                        //        user.UserName
+                        //    })
                     }));
                 }
             }
@@ -57,25 +57,25 @@ namespace Pineapple.Service.Controllers
                     {
                         chat.ChatId,
                         chat.ChatName,
-                        Users = chat.Users.Select(
-                            user =>
-                            new
-                            {
-                                user.UserId,
-                                user.UserName
-                            }),
-                        Messages = chat.Messages.Select(
-                            message=>new
-                            {
-                                User = new
-                                {
-                                    message.User.UserId,
-                                    message.User.UserName
-                                },
-                                message.MessageId,
-                                message.Text,
-                                message.SendDate,
-                            })
+                        //Users = chat.Users.Select(
+                        //    user =>
+                        //    new
+                        //    {
+                        //        user.UserId,
+                        //        user.UserName
+                        //    }),
+                        //Messages = chat.Messages.Select(
+                        //    message=>new
+                        //    {
+                        //        User = new
+                        //        {
+                        //            message.User.UserId,
+                        //            message.User.UserName
+                        //        },
+                        //        message.MessageId,
+                        //        message.Text,
+                        //        message.SendDate,
+                        //    })
                     }));
                 }
             }
@@ -137,6 +137,68 @@ namespace Pineapple.Service.Controllers
                     chat.Users.Add(user);
                     await context.SaveChangesAsync();
                     return Ok();
+                }
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception);
+            }
+        }
+
+        [HttpGet]
+        [Route("{chatId}/messages")]
+        public async Task<IActionResult> GetMessagesFromChat([FromRoute] Int32 chatId, [FromQuery] Int32 offset = 0, [FromQuery] Int32 count = 10)
+        {
+            try
+            {
+                using (var context = new PineappleContext(_connectionString))
+                {
+                    Message[] messages = await context.Messages
+                        .Include(message => message.User)
+                        .Include(message => message.Chat)
+                        .Where(message => message.Chat.ChatId == chatId)
+                        .OrderByDescending(message=>message.SendDate)
+                        .Skip(offset)
+                        .Take(count).
+                        ToArrayAsync();
+
+                    return Ok(messages.Select(message => new
+                    {
+                        message.MessageId,
+                        User = new
+                        {
+                            message.User.UserId,
+                            message.User.UserName
+                        },
+                        message.Text,
+                        message.SendDate,
+                    }));
+                }
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception);
+            }
+        }
+
+        [HttpGet]
+        [Route("{chatId}/users")]
+        public async Task<IActionResult> GetUsersFromChat([FromRoute] Int32 chatId)
+        {
+            try
+            {
+                using (var context = new PineappleContext(_connectionString))
+                {
+                    Chat chat = await context.Chats
+                        .Include(x => x.Users)
+                        .FirstOrDefaultAsync(x=>x.ChatId == chatId);
+
+                    return Ok(chat.Users.Select(user => 
+                    new
+                    {
+                        user.UserId,
+                        user.UserName
+                    }));
                 }
             }
             catch (Exception exception)

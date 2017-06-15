@@ -102,6 +102,5 @@ namespace Pineapple.Service.Controllers
                 return BadRequest(exception);
             }
         }
-
     }
 }
