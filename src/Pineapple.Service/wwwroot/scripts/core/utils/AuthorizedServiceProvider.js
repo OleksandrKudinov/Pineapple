@@ -40,6 +40,7 @@
             };
 
             service.Send = function (request, callback) {
+                service._attachEntrypoint(request);
                 if (!!callback) {
                     service._injectCallbackToRequest(request, callback);
                 }
