@@ -1,28 +1,20 @@
 ﻿angular
     .module("ChatServiceModule")
     .factory("ChatService",
-        [
-            "RequestCallbackInjector",
-            "AuthorizationService",
-            "EntryPointProvider",
-            function (requestCallbackInjector, authorizeService, entryPointProvider) {
-                var service = {};
-                
-                service.getChatsAsync = function (callback) {
+    [
+        "AuthorizedServiceProvider",
+        function (serviceProvider) {
+            var service = serviceProvider;
 
-                    var url = entryPointProvider.GetEntryPoint() +
-                        "api/chats";
-
-                    var request = {
-                        method: "get",
-                        url: url
-                    };
-
-                    requestCallbackInjector.InjectCallbackToRequest(request, callback);
-                    authorizeService.AuthorizeRequest(request);
-                    $.ajax(request);
+            service.getChatsAsync = function (callback) {
+                var request = {
+                    url: "api/chats",
+                    method: "get"
                 };
-                
-                return service;
-            }
-        ]);
+
+                service.SendAuth(request, callback);
+            };
+
+            return service;
+        }
+    ]);

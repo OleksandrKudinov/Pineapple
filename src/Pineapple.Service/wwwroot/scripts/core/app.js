@@ -4,9 +4,8 @@
         logout: "logout"
     };
 
-var app = angular.module("PineappleModule");
-
-app.controller("AuthController",
+angular.module("PineappleModule")
+    .controller("AuthController",
     [
         "AuthorizationService",
         "$scope",
@@ -30,4 +29,4 @@ app.controller("AuthController",
                 authService.Logout();
             };
         }]
-);
+    );
