@@ -27,6 +27,7 @@ namespace Pineapple.Service.Controllers
 
         [HttpGet]
         [Route("{userId}/chats")]
+        // TODO : make restrictions!
         public async Task<IActionResult> GetUserChats([FromRoute] Int32 userId)
         {
             try
