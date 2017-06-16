@@ -1,4 +1,4 @@
 <h1>Your chats:</h1>
-<div ng-repeat="chat in chatController.chats">
+<div ng-repeat="chat in chatController.chats" ng-click="chatController.selectChat(chat)">
     Chat: {{chat.chatName}} [{{chat.chatId}}]
 </div>

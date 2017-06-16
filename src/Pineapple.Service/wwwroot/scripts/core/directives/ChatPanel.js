@@ -13,6 +13,10 @@
 
                     context.chats = [];
 
+                    context.selectChat = function (chat) {
+                        $rootScope.$broadcast(GLOBALEVENTS.chatSelected, chat.chatId);
+                    };
+
                     context._getChatsCallback = function (isOk, chats) {
                         if (isOk) {
                             context.chats = chats;
@@ -26,18 +30,19 @@
                     context.getChats = function () {
                         chatService.getChatsAsync(context._getChatsCallback);
                     };
+                    
+                    $scope.$on(
+                        GLOBALEVENTS.login,
+                        function (event, args) {
+                            console.log("login!");
+                            context.getChats();
+                        });
 
-                    context._onLogin = function () {
-                        console.log("login!");
-                        context.getChats();
-                    };
-
-                    context._onLogout = function () {
-                        console.log("logout!");
-                    };
-
-                    $scope.$on(GLOBALEVENTS.login, context._onLogin);
-                    $scope.$on(GLOBALEVENTS.logout, context._onLogout);
+                    $scope.$on(
+                        GLOBALEVENTS.logout,
+                        function (event, args) {
+                            console.log("logout!");
+                        });
                 }
             };
         }

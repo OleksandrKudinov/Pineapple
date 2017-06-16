@@ -1,5 +1,6 @@
 ﻿var GLOBALEVENTS =
     {
         login: "login",
-        logout: "logout"
+        logout: "logout",
+        chatSelected: "chatSelected",
     };
