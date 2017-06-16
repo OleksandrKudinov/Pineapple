@@ -27,6 +27,14 @@
                     context.logout = function () {
                         authService.Logout();
                     };
+
+                    context.checkAuth = function() {
+                        authService.IsAuthorized(function(isOk, data) {
+                            
+                        });
+                    };
+
+                    context.checkAuth();
                 }
             };
         }
