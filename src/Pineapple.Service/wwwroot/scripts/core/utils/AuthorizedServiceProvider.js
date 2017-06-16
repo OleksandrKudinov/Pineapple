@@ -6,7 +6,6 @@
             var service = {};
 
             service._attachEntrypoint = function (request) {
-                //var entrypoint = "http://cab0a19b431a4978-001-site1.ctempurl.com/";
                 var entrypoint = "http://localhost:5000/";
                 request.url = entrypoint + request.url;
             };
