@@ -14,6 +14,31 @@
                 $rootScope.$broadcast(GLOBALEVENTS.login, data);
             };
 
+            service._isAurhorizedCallback = function (isOk) {
+                if (isOk) {
+                    var data = {
+                        "access_token": localStorage.getItem("access_token"),
+                        "expires": localStorage.getItem("expires")
+                    };
+
+                    $rootScope.$broadcast(GLOBALEVENTS.login, data);
+                } else {
+                    $rootScope.$broadcast(GLOBALEVENTS.logout, null);
+                }
+            };
+
+            service.IsAuthorized = function (callback) {
+                var request =
+                    {
+                        url: "api/chats",
+                        method: "get"
+                    };
+                service.SendAuth(request, function(isOk, data) {
+                    service._isAurhorizedCallback(isOk);
+                    callback(isOk, data);
+                });
+            };
+
             service.Login = function (credentials, callback) {
                 var request = {
                     url: "auth/token",
