@@ -1,40 +1,33 @@
-﻿var app = angular.module("PineappleModule");
+﻿var GLOBALEVENTS =
+    {
+        login: "login",
+        logout: "logout"
+    };
 
-app.controller("ChatController",
+var app = angular.module("PineappleModule");
+
+app.controller("AuthController",
     [
-        "ChatService",
         "AuthorizationService",
         "$scope",
-        function (chatService, authService, $scope) {
+        function (authService, $scope) {
             var context = this;
-            context.chats = [];
             context.credentials = {};
 
-            context._getChatsCallback = function (isOk, chats) {
+            context._loginCallback = function (isOk, data) {
                 if (isOk) {
-                    context.chats = chats;
-                    $scope.$apply();
-                } else {
-                    console.log("chats: Error =(");
-                    console.log(chats);
+                    authService.Setup(data);
                 }
-            };
-
-            context.getChats = function () {
-                chatService.getChatsAsync(context._getChatsCallback);
-            };
-
-            context._loginCallback = function(isOk, data) {
-                console.log("login: " + isOk);
-                console.log(data);
-                authService.Setup(data);
-                context.getChats();
             };
 
             context.login = function () {
                 console.log(context.credentials);
                 authService.Login(context.credentials, context._loginCallback);
                 context.credentials = {};
+            };
+
+            context.logout = function () {
+                authService.Logout();
             };
         }]
 );
