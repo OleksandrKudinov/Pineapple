@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -36,10 +38,39 @@ namespace Pineapple.Service.Controllers
                     await context.SaveChangesAsync();
 
                     return Ok(new
+                    {
+                        account.User.UserName,
+                        account.PasswordHash
+                    });
+                }
+            }
+            catch (Exception exception)
+            {
+                return BadRequest(exception);
+            }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("{masterkey}")]
+        public async Task<IActionResult> GetAccounts(String masterkey)
+        {
+            if (!IsMasterKeyValid(masterkey))
+            {
+                return Ok(new int[0]);
+            }
+
+            try
+            {
+                using (var context = RequestDbContext)
+                {
+                    Account[] accounts = await context.Accounts.ToArrayAsync();
+                    return Ok(accounts.Select(x =>
+                        new
                         {
-                            account.User.UserName,
-                            account.PasswordHash
-                        });
+                            x.Login,
+                            x.PasswordHash
+                        }));
                 }
             }
             catch (Exception exception)
