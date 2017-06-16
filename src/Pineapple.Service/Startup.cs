@@ -66,7 +66,7 @@ namespace Pineapple.Service
                 var options = new TokenProviderOptions
                 {
                     Path = "/token",
-                    Expiration = TimeSpan.FromDays(365),
+                    Expiration = TimeSpan.FromDays(1),
                     Audience = "ExampleAudience",
                     Issuer = "ExampleIssuer",
                     SigningCredentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256),
