@@ -12,8 +12,11 @@ namespace Pineapple.Service.Controllers
 {
     public class ChatsController : BaseController
     {
+
         [HttpGet]
-        public async Task<IActionResult> GetChats()
+        [Route("all")]
+        // TODO : make restrictions!
+        public async Task<IActionResult> GetAllChats()
         {
             try
             {
@@ -41,42 +44,22 @@ namespace Pineapple.Service.Controllers
             }
         }
 
-        [HttpGet("{chatId}")]
-        public async Task<IActionResult> GetChatById(Int32 chatId)
+        [HttpGet]
+        public async Task<IActionResult> GetUserChats()
         {
             try
             {
                 using (var context = RequestDbContext)
                 {
-                    var chats = await context.Chats
-                        .Include(x => x.Users)
-                        .Include(x => x.Messages)
-                        .ToArrayAsync();
+                    var principalName = HttpContext.User.Claims.FirstOrDefault().Value;
 
-                    return Ok(chats.Select(chat =>
+                    var currentUser = await context.Users.Include(x => x.Chats).FirstOrDefaultAsync(x => x.UserName == principalName);
+
+                    return Ok(currentUser.Chats.Select(chat =>
                     new
                     {
                         chat.ChatId,
                         chat.ChatName,
-                        //Users = chat.Users.Select(
-                        //    user =>
-                        //    new
-                        //    {
-                        //        user.UserId,
-                        //        user.UserName
-                        //    }),
-                        //Messages = chat.Messages.Select(
-                        //    message=>new
-                        //    {
-                        //        User = new
-                        //        {
-                        //            message.User.UserId,
-                        //            message.User.UserName
-                        //        },
-                        //        message.MessageId,
-                        //        message.Text,
-                        //        message.SendDate,
-                        //    })
                     }));
                 }
             }
@@ -85,6 +68,7 @@ namespace Pineapple.Service.Controllers
                 return BadRequest(exception);
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> CreateChat([FromBody] ChatBindingModel model)
@@ -95,17 +79,18 @@ namespace Pineapple.Service.Controllers
             }
             try
             {
-                var userName = HttpContext.User.Claims.FirstOrDefault().Value;
+                var principalName = HttpContext.User.Claims.FirstOrDefault().Value;
 
                 using (var context = RequestDbContext)
                 {
-                    var currentUser = await context.Users.FirstOrDefaultAsync(x => x.UserName == userName);
+                    var chatCreator = await context.Users.FirstOrDefaultAsync(x => x.UserName == principalName);
+
                     var chat = new Chat()
                     {
                         ChatName = model.ChatName
                     };
                     chat.Users = new List<User>();
-                    chat.Users.Add(currentUser);
+                    chat.Users.Add(chatCreator);
                     context.Chats.Add(chat);
                     await context.SaveChangesAsync();
                     return Ok(new
@@ -133,21 +118,34 @@ namespace Pineapple.Service.Controllers
             {
                 using (var context = RequestDbContext)
                 {
-                    var chat = await context.Chats.FirstOrDefaultAsync(x => x.ChatId == chatId);
+                    var userName = HttpContext.User.Claims.FirstOrDefault().Value;
+
+                    var chat = await context.Chats
+                        .Include(x => x.Users)
+                        .FirstOrDefaultAsync(x => x.ChatId == chatId);
 
                     if (chat == null)
                     {
-                        return BadRequest($"chat {chatId} does not exist");
+                        return BadRequest($"Chat {chatId} does not exist");
+                    }
+
+                    if (!chat.Users.Any(x => x.UserName == userName))
+                    {
+                        return BadRequest($"You are not member of chat {chatId}");
                     }
 
                     var user = await context.Users.FirstOrDefaultAsync(x => x.UserId == userId);
 
                     if (user == null)
                     {
-                        return BadRequest($"user {userId} does not exist");
+                        return BadRequest($"User {userId} does not exist");
                     }
 
-                    chat.Users = chat.Users ?? new List<User>();
+                    if (chat.Users.Any(x => x.UserId == user.UserId))
+                    {
+                        return BadRequest($"User {user.UserId} has been already added into the chat {chat.ChatId}");
+                    }
+
                     chat.Users.Add(user);
                     await context.SaveChangesAsync();
                     return Ok();
@@ -208,7 +206,7 @@ namespace Pineapple.Service.Controllers
             {
                 using (var context = RequestDbContext)
                 {
-                    var userName = HttpContext.User.Claims.FirstOrDefault().Value;
+                    var principalName = HttpContext.User.Claims.FirstOrDefault().Value;
 
                     var chat = await context.Chats.Include(x => x.Users).FirstOrDefaultAsync(x => x.ChatId == chatId);
 
@@ -217,16 +215,16 @@ namespace Pineapple.Service.Controllers
                         return BadRequest($"Chat with {chatId} does not exist");
                     }
 
-                    var user = chat.Users.FirstOrDefault(x => x.UserName == userName);
+                    var chatMember = chat.Users.FirstOrDefault(x => x.UserName == principalName);
 
-                    if (user == null)
+                    if (chatMember == null)
                     {
                         return BadRequest($"User does not exist in chat {chatId}");
                     }
 
                     var message = new Message()
                     {
-                        User = user,
+                        User = chatMember,
                         Chat = chat,
                         Text = model.Text,
                         SendDate = DateTime.UtcNow
@@ -252,16 +250,28 @@ namespace Pineapple.Service.Controllers
             {
                 using (var context = RequestDbContext)
                 {
+                    var principalName = HttpContext.User.Claims.FirstOrDefault().Value;
+
                     Chat chat = await context.Chats
                         .Include(x => x.Users)
                         .FirstOrDefaultAsync(x => x.ChatId == chatId);
 
-                    return Ok(chat.Users.Select(user =>
-                    new
+                    if (chat == null)
                     {
-                        user.UserId,
-                        user.UserName
-                    }));
+                        return BadRequest($"Chat {chatId} does not exist");
+                    }
+
+                    if (!chat.Users.Any(x => x.UserName == principalName))
+                    {
+                        return BadRequest($"You are not member of the chat {chatId}");
+                    }
+
+                    return Ok(chat.Users.Select(user =>
+                        new
+                        {
+                            user.UserId,
+                            user.UserName
+                        }));
                 }
             }
             catch (Exception exception)
