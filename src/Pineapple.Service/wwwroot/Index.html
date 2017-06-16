@@ -8,16 +8,27 @@
 </head>
 <body ng-app="PineappleModule">
     <h1>Welcome to Pineapple chat</h1>
+<div ng-controller="ChatController as ctrl">
+    <div>
+        <input ng-model="ctrl.credentials.username" type="text" placeholder="username"/>
+        <input ng-model="ctrl.credentials.password" type="password" placeholder="password"/>
+        <button ng-click="ctrl.login()">Login</button>
+    </div>
+    <div ng-repeat="chat in ctrl.chats">
+        Chat: {{chat.chatName}} [{{chat.chatId}}]
+    </div>
+</div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
 
-    <script src="scripts/app.js"></script>
     <script src="scripts/core/config.js"></script>
 
     <script src="scripts/core/utils/RequestCallbackInjector.js"></script>
     <script src="scripts/core/utils/EntryPointProvider.js"></script>
     <script src="scripts/core/utils/AuthorizationService.js"></script>
     <script src="scripts/core/services/ChatService.js"></script>
+
+    <script src="scripts/core/app.js"></script>
 </body>
 </html>
