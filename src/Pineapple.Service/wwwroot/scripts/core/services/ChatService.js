@@ -15,11 +15,11 @@
                 service.SendAuth(request, callback);
             };
 
-            service.getGetMessagesFromChatAsync = function (chatId, callback) {
+            service.getMessagesFromChatAsync = function (chatId, callback) {
                 var request = {
                     url: "api/chats/" + chatId + "/messages",
-                    method:"get"
-                }
+                    method: "get"
+                };
 
                 service.SendAuth(request, callback);
             };
@@ -33,7 +33,7 @@
                 service.SendAuth(request, callback);
             };
 
-            service.SendMessageToChatAsync = function(chatId, message, callback) {
+            service.sendMessageToChatAsync = function(chatId, message, callback) {
                 var request = {
                     url: "api/chats/" + chatId + "/messages",
                     method: "post",

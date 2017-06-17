@@ -14,7 +14,7 @@
                     context.chats = [];
 
                     context.selectChat = function (chat) {
-                        $rootScope.$broadcast(GLOBALEVENTS.chatSelected, chat.chatId);
+                        $rootScope.$broadcast(GLOBALEVENTS.chatSelected, chat);
                     };
 
                     context._getChatsCallback = function (isOk, chats) {

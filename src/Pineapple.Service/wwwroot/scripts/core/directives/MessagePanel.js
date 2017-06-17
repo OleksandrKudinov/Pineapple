@@ -26,7 +26,7 @@
                     context.getMessagesFromChat = function (chatId) {
                         console.log("chatId: ");
                         console.log(chatId);
-                        chatService.getGetMessagesFromChatAsync(chatId, context._getMessagesFromChatCallback);
+                        chatService.getMessagesFromChatAsync(chatId, context._getMessagesFromChatCallback);
                     };
 
                     $scope.$on(
