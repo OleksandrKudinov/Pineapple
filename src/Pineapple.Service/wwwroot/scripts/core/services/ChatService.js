@@ -33,6 +33,16 @@
                 service.SendAuth(request, callback);
             };
 
+            service.SendMessageToChatAsync = function(chatId, message, callback) {
+                var request = {
+                    url: "api/chats/" + chatId + "/messages",
+                    method: "post",
+                    data: JSON.stringify(message)
+                };
+
+                service.SendAuth(request, callback);
+            };
+
             return service;
         }
     ]);
