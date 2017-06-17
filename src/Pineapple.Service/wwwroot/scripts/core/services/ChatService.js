@@ -23,6 +23,15 @@
 
                 service.SendAuth(request, callback);
             };
+            
+            service.getAllUsersFromChatAsync = function (chatId, callback) {
+                var request = {
+                    url: "api/chats/" + chatId + "/users",
+                    method: "get"
+                };
+
+                service.SendAuth(request, callback);
+            };
 
             return service;
         }
