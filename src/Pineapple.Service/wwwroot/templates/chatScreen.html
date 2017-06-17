@@ -1,0 +1,19 @@
+<div ng-show="true">
+    <h1>[{{chatCtrl.chat.chatName}}]</h1>
+    <div>
+        <span>Users: </span>
+        <span ng-repeat="user in chatCtrl.users">
+            [{{user.userName}}]
+        </span>
+    </div>
+    <div>
+        <div>Messages:</div>
+        <div ng-repeat="message in chatCtrl.messages">
+            [{{message.user.userName}}]: {{message.text}}
+        </div>
+    </div>
+    <div>
+        <input ng-model="chatCtrl.message.text"/>
+        <button ng-click="chatCtrl.sendMessage()">Send</button>
+    </div>
+</div>
