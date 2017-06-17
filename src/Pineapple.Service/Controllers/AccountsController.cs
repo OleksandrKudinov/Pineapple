@@ -78,5 +78,32 @@ namespace Pineapple.Service.Controllers
                 return BadRequest(exception);
             }
         }
+
+        [HttpGet]
+        [Route("whoami")]
+        public async Task<IActionResult> GetUserByAuth()
+        {
+            try
+            {
+                var principalName = HttpContext.User.Claims.FirstOrDefault().Value;
+                using (var context = RequestDbContext)
+                {
+                    var account =
+                        await context.Accounts
+                            .Include(x => x.User)
+                            .FirstOrDefaultAsync(x => x.User.UserName == principalName);
+
+                    return Ok(new
+                    {
+                        account.User.UserId,
+                        account.User.UserName
+                    });
+                }
+            }
+            catch(Exception exception)
+            {
+                return BadRequest(exception);
+            }
+        }
     }
 }

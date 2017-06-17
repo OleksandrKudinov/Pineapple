@@ -30,10 +30,11 @@
             service.IsAuthorized = function (callback) {
                 var request =
                     {
-                        url: "api/chats",
+                        url: "api/accounts/whoami",
                         method: "get"
                     };
-                service.SendAuth(request, function(isOk, data) {
+                service.SendAuth(request, function (isOk, data) {
+                    console.log(data);
                     service._isAurhorizedCallback(isOk);
                     callback(isOk, data);
                 });
