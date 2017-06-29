@@ -76,8 +76,10 @@ namespace Pineapple.Service
 
             builder.Register<PineappleContext>(x =>
             {
-                var connectionString = x.Resolve<IConfigurationRoot>()
-                    .GetConnectionString("Production");
+                var config = x.Resolve<IConfigurationRoot>();
+                var envName = config["environment"];
+                var connectionString = config
+                    .GetConnectionString(envName);
                 return new PineappleContext(connectionString);
             });
         }
